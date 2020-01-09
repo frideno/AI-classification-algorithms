@@ -10,23 +10,39 @@ if __name__=="__main__":
     dh.load_data('dataset.txt')
 
     train_data = dh.values
+    del(dh.attributes_params['can_eat'])
 
     # build models.
-    #model = algorithms.KNN_Model(k=5)
-    #model = algorithms.Naive_Bayes_Model(dh.classes, [len(v) for v in dh.attributes_params.values()][:-1])
-    model = algorithms.Decision_Tree(len(dh.classes), [len(v) for v in dh.attributes_params.values()][:-1])
-
+    knn_model = algorithms.KNN_Model(k=5)
+    nb_model = algorithms.Naive_Bayes_Model(dh.classes, [len(v) for v in dh.attributes_params.values()])
+    id3_model = algorithms.Decision_Tree_Model(dh.classes, dh.attributes_params)
     
     # K-cross validation:
+    accuracies = {}
     validator = algorithms.TesterValidator(train_data)
-    p = validator.kfold_cross_validate(model, K=10)
-    print(p)
-    test_examples = [
-        [0]*22,
-        [0]*21 + [1],
-        [1] * 22
-    ]
-    res = validator.test(model, test_examples)
-    for i, branch in enumerate(model.tree):
-        print(i, branch)
-    print(res)
+    accuracies['knn'] = validator.kfold_cross_validate(knn_model, K=5)
+    accuracies['naive_bayes'] = validator.kfold_cross_validate(nb_model, K=5)
+    accuracies['decision tree'] = validator.kfold_cross_validate(id3_model, K=5)
+
+    print('kfold validation:')
+    print(accuracies)
+
+    test_dh = help.DataHandler()
+    test_dh.load_metadata('attributes')
+    test_dh.load_data('test.txt')
+
+    test_data = test_dh.values
+
+    validator = algorithms.TesterValidator(train_data)
+    accuracies['knn'] = validator.test(knn_model, test_data)
+    accuracies['naive_bayes'] = validator.test(nb_model, test_data)
+    accuracies['decision tree'] = validator.test(id3_model, test_data)
+
+    print('test:')
+    print(accuracies)
+
+    # prints the tree:
+
+    rootNode = id3_model.root_node
+    tree = rootNode.str()
+    print(tree)

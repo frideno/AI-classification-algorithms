@@ -120,12 +120,70 @@ class Naive_Bayes_Model:
         return most_likly_class
 
 
-class Decision_Tree:
-    def __init__(self, classes, features_values):
-        self.classes = classes
-        self.features_values = features_values
-        self.features = list(range(len(features_values)))
-        self.tree = []
+class Node:
+    """
+    """
+     
+    def __init__(self, feature, leaf=False):
+        """
+        create new node, as tree or not by demand.
+        """
+
+        self.__feature_num, self.__feature_desc, self.__feature_values_desc = feature
+        self.__leaf = leaf
+        if not leaf:
+            self.__branches = {}
+
+    def add_branch(self, feature_val, node):
+        self.__branches[feature_val] = node
+
+    
+    def is_leaf(self):
+        return self.__leaf
+
+    def get_branch(self, feature_val):
+        if self.__leaf:
+            return None
+        else:
+            return self.__branches[feature_val]
+
+    def val(self):
+        return self.__feature_num
+
+
+    s = ""
+    def __str_recursive(self, indent):
+        """
+        recursively print the tree.
+        """
+        if self.__leaf:
+            Node.s += ':' + self.__feature_desc
+        else:
+            for val, node in self.__branches.items():
+                Node.s += '\n' + '\t' * indent + '|' * int(indent > 0)
+                Node.s += self.__feature_desc + '=' + self.__feature_values_desc[val]
+                node.__str_recursive(indent + 1)
+                
+    
+    def str(self):
+        Node.s = ""
+        self.__str_recursive(0)
+        return self.s[:]
+
+
+class Decision_Tree_Model:
+    def __init__(self, classes_names, features_values_names):
+        self.classes_names = classes_names
+        self.classes = len(classes_names)
+
+        self.features_names = []
+        self.features_values = {}
+        self.features_values_names = features_values_names
+        for i, k in enumerate(features_values_names.keys()):
+            self.features_values[i] = len(features_values_names[k])
+            self.features_names.append(k)
+
+        self.features = list(range(len(self.features_values)))
 
     def __entropy(self, data):
         try:
@@ -194,20 +252,23 @@ class Decision_Tree:
 
     def __split_recursively(self, data, used_features):
 
-        path = '#'
         # mark remaining features.
         features_remaining = [f for f in self.features if f not in used_features]
 
         # leaf case 1: - homogenic data. classify by the only class.
         if self.__is_homogenic(data):
-            self.tree.append((used_features, data[0][-1]))
+            cls = data[0][-1]
+            return Node((cls, self.classes_names[cls], None), leaf=True)
+            #self.tree.append((used_features, data[0][-1]))
 
         # leaf case 2: if no feature remain, pick class by majority of data:
         elif len(features_remaining) == 0:
-            self.tree.append((used_features, self.__majority_class(data)))
+            most_common_class = self.__majority_class(data)
+            return Node((most_common_class, self.classes_names[most_common_class], None), leaf=True)
         
         # call recursive:
         else:
+
             # calc ig for each feature not used yet
             igs = {feature:self.__calc_information_gain(data, feature) for feature in features_remaining}
             # take feature with max ig.
@@ -217,24 +278,37 @@ class Decision_Tree:
             sub_datas = self.__split_by_feature(data, max_ig_feature)
             most_common_class = self.__majority_class(data)
 
+            max_ig_feature_dsc = self.features_names[max_ig_feature]
+            nd = Node((max_ig_feature,max_ig_feature_dsc, self.features_values_names[max_ig_feature_dsc]))
+
             for val in range(self.features_values[max_ig_feature]):
                 used_features_sub = used_features.copy()
                 used_features_sub[max_ig_feature] = val   
                 if val in sub_datas:
                     sub_data = sub_datas[val]
-                    self.__split_recursively(sub_data, used_features_sub)
+                    child_nd = self.__split_recursively(sub_data, used_features_sub)
+
                 else:
-                    self.tree.append((used_features_sub, most_common_class))
+                    #self.tree.append((used_features_sub, most_common_class))
+                    child_nd = Node((most_common_class, self.classes_names[most_common_class], None), leaf=True)
 
-
+                nd.add_branch(val, child_nd)
+            
+            return nd
 
     def train(self, train_data):
-        res = self.__split_recursively(train_data, {})
+        self.root_node = self.__split_recursively(train_data, {})
         
 
     def predict(self, test_example):
-        return 1
-
+        # traverse the tree by attribute values until a leaf - which have the class:
+        node = self.root_node
+        while not node.is_leaf():
+            feature_val = test_example[node.val()]
+            node = node.get_branch(feature_val)
+        
+        cls = node.val()
+        return cls
 
 class TesterValidator:
 
@@ -272,12 +346,16 @@ class TesterValidator:
 
     def test(self, model, test_data):
         """
-        train model on data set, and return test_data predictions.
+        train model on data set, and return test_data predictions accuracy.
         """
         model.train(self.train_data)
-        predictions = []
-        for test_example in test_data:
-            predictions.append(model.predict(test_example))
-        return predictions
 
+        count = 0
+        for test_example in test_data:
+            y = test_example[-1]
+            y_hat = model.predict(test_example)
+            if y == y_hat:
+                count += 1
+
+        return count / len(test_data)
 

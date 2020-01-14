@@ -2,7 +2,6 @@ from help import argmax
 import heapq
 import help
 from math import log2
-import random
 import operator
 
 
@@ -317,7 +316,6 @@ class TesterValidator:
         k fold cross validation on train data, with model.predict.
         return the average of correctness.
         """
-        random.shuffle(self.train_data)
         s = len(self.train_data) // K
         correct_percentages = []
         for i in range(K):

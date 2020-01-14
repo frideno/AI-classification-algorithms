@@ -1,7 +1,5 @@
 import help
 import algorithms
-import random
-import numpy as np
 
 if __name__=="__main__":
     # extract train data.
@@ -24,25 +22,15 @@ if __name__=="__main__":
     accuracies['naive_bayes'] = validator.kfold_cross_validate(nb_model, K=5)
     accuracies['decision tree'] = validator.kfold_cross_validate(id3_model, K=5)
 
-    print('kfold validation:')
-    print(accuracies)
 
-    test_dh = help.DataHandler()
-    test_dh.load_metadata('attributes')
-    test_dh.load_data('test.txt')
-
-    test_data = test_dh.values
-
-    validator = algorithms.TesterValidator(train_data)
-    accuracies['knn'] = validator.test(knn_model, test_data)
-    accuracies['naive_bayes'] = validator.test(nb_model, test_data)
-    accuracies['decision tree'] = validator.test(id3_model, test_data)
-
-    print('test:')
-    print(accuracies)
+    with open('accuracy.txt', 'w') as f:
+        f.write(str(accuracies['decision tree']) + '\t' + str(accuracies['knn']) + '\t' + str(accuracies['naive_bayes']))
 
     # prints the tree:
-
+    id3_model.train(train_data)
     rootNode = id3_model.root_node
-    tree = rootNode.str()
-    print(tree)
+    with open('tree.txt' ,'w') as t:
+        t.write(rootNode.str()[1:])
+
+
+

@@ -35,7 +35,7 @@ class DataHandler:
                 vl_numerical = [self.attributes_params[attributes_order[i]].index(splt[i]) for i in range(len(splt))]
                 self.values.append(vl_numerical)
 
-        print('extracted ' + str(len(self.values) )+ ' values from ' + data_file_name)
+        # print('extracted ' + str(len(self.values) )+ ' values from ' + data_file_name)
 
 
 
@@ -50,3 +50,6 @@ def hamming_distance(arr1, arr2):
     return diffs
 
 
+# helpful functions from numpy:
+def argmax(arr):
+    return arr.index(max(arr))

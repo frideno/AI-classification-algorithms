@@ -1,12 +1,9 @@
-import numpy as np
-from numpy import argmax
+from help import argmax
 import heapq
 import help
 from math import log2
 import random
-from functools import reduce
 import operator
-from collections import Counter
 
 
 """
@@ -116,7 +113,7 @@ class Naive_Bayes_Model:
             class_probabilities.append(pr)
 
         # take class with most probability:
-        most_likly_class = np.argmax(np.array(class_probabilities))
+        most_likly_class = argmax(class_probabilities)
         return most_likly_class
 
 

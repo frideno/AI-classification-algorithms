@@ -4,7 +4,7 @@ import algorithms
 if __name__=="__main__":
     # extract train data.
     dh = help.DataHandler()
-    dh.load_metadata('attributes')
+    dh.load_metadata('train.txt')
     dh.load_data('train.txt')
 
     train_data = dh.values
@@ -16,7 +16,7 @@ if __name__=="__main__":
     id3_model = algorithms.Decision_Tree_Model(dh.classes, dh.attributes_params)
 
     test_dh = help.DataHandler()
-    test_dh.load_metadata('attributes')
+    test_dh.load_metadata('test.txt')
     test_dh.load_data('test.txt')
 
     test_data = test_dh.values

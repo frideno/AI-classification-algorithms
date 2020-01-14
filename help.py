@@ -9,24 +9,41 @@ class DataHandler:
         self.values = []
         self.classes = []
 
-    def load_metadata(self, attributes_file_name):
+    def load_metadata(self, data_file_name):
 
-        # read attributes paramater.
-        with open(attributes_file_name) as f:
+        attributes = {}
+        classes = set()
+        with open(data_file_name) as f:
+            # read attribute names + order
+            attributes_order = f.readline()[:-1].split('	')
+            for a in attributes_order:
+                attributes[a] = set()
+
+            # read data
             for line in f:
-                splt = line[:-1].split(':')
-                att_name, param_names = splt[0], splt[1].split(',')
-                self.attributes_params[att_name] = sorted(param_names)
+                splt = line[:-1].split('	')
+                for att, val in zip(attributes_order, splt):
+                    attributes[att].add(val)
+                classes.add(splt[-1])
+
+            # set attributes names and values.
+            for att_name, param_names in attributes.items():
+                self.attributes_params[att_name] = sorted(list(param_names))
+
             # make last attribute the classes:
-            self.classes = param_names[:]
+            self.classes = sorted(list(classes))
 
     def load_data(self, data_file_name):
+
+
         """
         extracting data from filename, by seperator.
         attributes turn into numerical values by attributes file.
         """
+
         # read data from data file by attributes read.
         with open(data_file_name) as f:
+
             # read attribute names + order
             attributes_order = f.readline()[:-1].split('	')
             # read data

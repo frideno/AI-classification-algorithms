@@ -4,7 +4,7 @@ import algorithms
 if __name__=="__main__":
     # extract train data.
     dh = help.DataHandler()
-    dh.load_metadata('attributes')
+    dh.load_metadata('dataset.txt')
     dh.load_data('dataset.txt')
 
     train_data = dh.values

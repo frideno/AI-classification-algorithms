@@ -24,7 +24,8 @@ if __name__=="__main__":
 
 
     with open('accuracy.txt', 'w') as f:
-        f.write(str(accuracies['decision tree']) + '\t' + str(accuracies['knn']) + '\t' + str(accuracies['naive_bayes']))
+        f.write("{0:.2f}".format(accuracies['decision tree']) + '\t' + "{0:.2f}".format(accuracies['knn']) + '\t' + "{0:.2f}".format(accuracies['naive_bayes']) + '\n')
+
 
     # prints the tree:
     id3_model.train(train_data)

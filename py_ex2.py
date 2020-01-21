@@ -32,5 +32,5 @@ if __name__=="__main__":
     with open('output.txt', 'w') as out:
         out.write(rootNode.str()[1:])
         out.write('\n')
-        out.write(str(accuracies['decision tree']) + '\t' + str(accuracies['knn']) + '\t' + str(accuracies['naive_bayes']))
+        out.write("{0:.2f}".format(accuracies['decision tree']) + '\t' + "{0:.2f}".format(accuracies['knn']) + '\t' + "{0:.2f}".format(accuracies['naive_bayes']) + '\n')
 
